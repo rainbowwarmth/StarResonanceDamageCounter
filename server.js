@@ -756,35 +756,9 @@ async function main() {
     }, 100);
 
     //express 和 socket.io 设置
-    const publicDir = (() => {
-        if (process.env.NODE_ENV === 'production') {
-            // 尝试多种可能的资源路径
-            const possiblePaths = [
-                path.join(process.resourcesPath, 'public'),
-                path.join(process.resourcesPath, 'app', 'public'),
-                path.join(__dirname, '..', 'public'),
-                path.join(__dirname, 'public')
-            ];
-            
-            for (const dir of possiblePaths) {
-                if (fs.existsSync(dir) && fs.existsSync(path.join(dir, 'index.html'))) {
-                    return dir;
-                }
-            }
-            return path.join(process.resourcesPath, 'public');
-        }
-        return path.join(__dirname, 'public');
-    })();
-    
     app.use(cors());
     app.use(express.json()); // 解析JSON请求体
-    app.use(express.static(publicDir)); // 静态文件服务
-    
-    // 修复2: 添加通配符路由处理
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(publicDir, 'index.html'));
-    });
-    
+    app.use(express.static(path.join(process.cwd(), 'public'))); // 静态文件服务
     const server = http.createServer(app);
     const io = new Server(server, {
         cors: {
@@ -856,7 +830,6 @@ async function main() {
             logger.info('WebSocket client disconnected: ' + socket.id);
         });
     });
-
 
     // 每50ms广播数据给所有WebSocket客户端
     setInterval(() => {
