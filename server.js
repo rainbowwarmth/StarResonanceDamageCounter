@@ -756,9 +756,12 @@ async function main() {
     }, 100);
 
     //express 和 socket.io 设置
+    const publicDir = process.env.NODE_ENV === 'production'
+  ? path.join(process.resourcesPath, 'public')
+  : path.join(__dirname, 'public');
     app.use(cors());
     app.use(express.json()); // 解析JSON请求体
-    app.use(express.static(path.join(__dirname, 'public'))); // 静态文件服务
+    app.use(express.static(publicDir)); // 静态文件服务
     const server = http.createServer(app);
     const io = new Server(server, {
         cors: {
